@@ -6,18 +6,23 @@ namespace TestGame.world;
 public partial class World : Node
 {
     private TileMap _tileMap;
-    
+
     [Export] private int _worldWidth;
     [Export] private int _worldHeight;
 
-    private  Block[,] _blocks;
+    private WorldData _worldData;
 
     public override void _Ready()
     {
-        _blocks = new Block[_worldWidth, _worldHeight];
         _tileMap = GetNode<TileMap>("TileMap");
-
-        Randomize();
+        var generator = GetNode<WorldGenerator>("WorldGenerator");
+        var settings = new WorldGenerationSettings
+        {
+            WorldWidth = _worldWidth,
+            WorldHeight = _worldHeight,
+            Seed = new Random().Next()
+        };
+        _worldData = generator.GenerateWorld(settings);
         UpdateTilemap();
     }
 
@@ -27,21 +32,16 @@ public partial class World : Node
         {
             for (var y = 0; y < _worldHeight; y++)
             {
-                var block = _blocks[x, y];
-                _tileMap.SetCell(0, new Vector2I(x, y), block.SourceId, new Vector2I(7, 1));
-            }
-        }
-    }
-
-    private void Randomize()
-    {
-        for (var x = 0; x < _worldWidth; x++)
-        {
-            for (var y = 0; y < _worldHeight; y++)
-            {
-                var next = new Random().Next(0, 2);
-                var block = next == 1 ? Blocks.GetBlock(BlockType.Stone) : Blocks.GetBlock(BlockType.Dirt);
-                _blocks[x, y] = block;
+                var block = _worldData.Blocks[x, y];
+                if (block != null)
+                {
+                    var coords = new Vector2I(
+                        x - _worldData.WorldWidth / 2,
+                        -y + _worldData.WorldHeight / 2
+                    );
+                    _tileMap.SetCell(0, coords, block.SourceId,
+                        new Vector2I(7, 1));
+                }
             }
         }
     }
