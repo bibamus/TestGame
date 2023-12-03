@@ -6,29 +6,38 @@ namespace TestGame.world.generation;
 [GlobalClass]
 public partial class TerrainGenerationStep : GenerationStep
 {
-    public override WorldData Apply(WorldData worldData, WorldGenerationSettings settings)
+    [Export] private int _amplitude = 10;
+
+    [Export] private float _frequency = 0.1f;
+
+    [Export] private float _fractalGain = 0.3f;
+
+    public override WorldGenerationData Apply(WorldGenerationData data, WorldGenerationSettings settings)
     {
-        var amplitude = 10;
+        var worldData = data.WorldData;
 
         var fastNoiseLite = new FastNoiseLite
         {
             Seed = settings.Seed,
-            Frequency = 0.1f,
+            Frequency = _frequency,
             NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin,
-            FractalGain = 0.3f
+            FractalGain = _fractalGain
         };
 
-
+        var terrainHeights = new int[settings.WorldWidth];
         for (var x = 0; x < settings.WorldWidth; x++)
         {
             var noise = fastNoiseLite.GetNoise1D(x);
-            var height = (int) Math.Floor((worldData.SurfaceLevel) + noise * amplitude);
+            var height = (int) Math.Floor((worldData.SurfaceLevel) + noise * _amplitude);
+            terrainHeights[x] = height;
             for (var y = 0; y < height; y++)
             {
                 worldData.Blocks[x, y] = Blocks.GetBlock(BlockType.Dirt);
             }
         }
 
-        return worldData;
+        data.TerrainHeightMap = terrainHeights;
+
+        return data;
     }
 }

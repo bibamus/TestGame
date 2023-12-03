@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Godot;
+using Godot.Collections;
 using TestGame.world.generation;
+
+using System.Linq;
 
 namespace TestGame.world;
 
@@ -12,15 +15,11 @@ public partial class WorldGenerator : Node
     public override void _Ready()
     {
         base._Ready();
-        var children = GetChildren();
-        _steps = new List<GenerationStep>();
-        foreach (var child in children)
-        {
-            if (child is GenerationStep step)
-            {
-                _steps.Add(step);
-            }
-        }
+        _steps = GetChildren()
+            .Where(node => node is GenerationStep)
+            .Cast<GenerationStep>()
+            .ToList();
+        
     }
 
     public WorldData GenerateWorld(WorldGenerationSettings settings)
@@ -30,11 +29,13 @@ public partial class WorldGenerator : Node
             SurfaceLevel = (int) Math.Floor(settings.WorldHeight * 0.75),
         };
 
+        var worldGenerationData = new WorldGenerationData(worldData);
+
         foreach (var generationStep in _steps)
         {
-            worldData = generationStep.Apply(worldData, settings);
+            worldGenerationData = generationStep.Apply(worldGenerationData, settings);
         }
 
-        return worldData;
+        return worldGenerationData.WorldData;
     }
 }
