@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using TestGame.world.generation;
 
@@ -6,19 +8,25 @@ namespace TestGame.world;
 
 public partial class World : Node
 {
-    private TileMap _tileMap;
-
     [Export] private int _worldWidth;
     [Export] private int _worldHeight;
 
     [Export] private Node2D _player;
-    
+
     private WorldData _worldData;
+
+    private TileMapChunk[,] _chunkMaps;
 
     public override void _Ready()
     {
-        _tileMap = GetNode<TileMap>("TileMap");
-        var generator = GetNode<generation.WorldGenerator>("WorldGenerator");
+        // _tileMap = GetNode<TileMap>("TileMap");
+
+        var tileMapScene = GD.Load<PackedScene>("res://scenes/tile_map.tscn");
+        // var inst = tileMapScene.Instantiate<TileMap>();
+        // AddChild(inst);
+        // _tileMap = inst;
+
+        var generator = GetNode<WorldGenerator>("WorldGenerator");
         var settings = new WorldGenerationSettings
         {
             WorldWidth = _worldWidth,
@@ -26,50 +34,97 @@ public partial class World : Node
             Seed = new Random().Next()
         };
         _worldData = generator.GenerateWorld(settings);
-        
-        
-        for(var x = 0; x < _worldWidth ; x++)
-        {
-            for (var y = 0; y < _worldHeight; y++)
-            {
-                var coord = _worldData.BottomLeft + new Vector2I(x,-y);
-                var block = _worldData.GetBlockAtWorldPosition(coord);
-               
 
+        _chunkMaps = new TileMapChunk[_worldData.HChunkCount, _worldData.VChunkCount];
+
+        for (var x = 0; x < _worldData.HChunkCount; x++)
+        {
+            for (var y = 0; y < _worldData.VChunkCount; y++)
+            {
+                var chunk = _worldData.GetChunk(x, y);
+                var chunkNode = tileMapScene.Instantiate<TileMapChunk>();
+                chunkNode.Name = $"Chunk {x},{y}";
+                chunkNode.Blocks = chunk;
+                var chunkY = (_worldData.VChunkCount - y) * _worldData.ChunkSize.Y * 16;
+                var chunkX = x * _worldData.ChunkSize.X * 16;
+                chunkNode.Position = new Vector2(chunkX, chunkY);
+                _chunkMaps[x, y] = chunkNode;
+                // AddChild(chunkNode);
             }
         }
-        
-        // UpdateTilemap();
     }
+
 
     public override void _Process(double delta)
     {
         base._Process(delta);
-    
-    }
-    
-    private Vector2I GetPlayerTilePosition()
-    {
-        return _tileMap.LocalToMap(_player.Position);
-    }
-    
-    private void UpdateTilemap()
-    {
-        for (var x = 0; x < _worldWidth; x++)
+        var playerChunk = GetPlayerChunk();
+        var surroundingChunks = GetSurroundingChunks(playerChunk);
+        var children = GetChildren()
+            .Where(node => node is TileMapChunk)
+            .Cast<TileMapChunk>()
+            .ToList();
+
+        var goal = new List<TileMapChunk>();
+
+        foreach (var chunk in surroundingChunks)
         {
-            for (var y = 0; y < _worldHeight; y++)
+            var chunkX = chunk.X;
+            var chunkY = chunk.Y;
+            if (chunkX < 0 || chunkX >= _worldData.HChunkCount || chunkY < 0 || chunkY >= _worldData.VChunkCount)
             {
-                var block = _worldData.Blocks[x, y];
-                if (block != null)
-                {
-                    var coords = new Vector2I(
-                        x - _worldData.WorldWidth / 2,
-                        -y + _worldData.WorldHeight / 2
-                    );
-                    _tileMap.SetCell(0, coords, block.SourceId,
-                        new Vector2I(7, 1));
-                }
+                continue;
+            }
+
+            var chunkNode = _chunkMaps[chunkX, chunkY];
+            if (chunkNode == null)
+            {
+                continue;
+            }
+            
+            goal.Add(chunkNode);
+        }
+
+        foreach (var child in children)
+        {
+            if (!goal.Contains(child))
+            {
+                RemoveChild(child);
             }
         }
+
+        foreach (var chunk in goal)
+        {
+            if (chunk.GetParent() == this)
+            {
+                continue;
+            }
+
+            AddChild(chunk);
+        }
+    }
+
+    private Vector2I GetPlayerChunk()
+    {
+        var playerPos = _player.Position;
+        var chunkX = (int)Math.Floor(playerPos.X / (_worldData.ChunkSize.X * 16));
+        var chunkY = (int)Math.Floor(playerPos.Y / (_worldData.ChunkSize.Y * 16));
+        return new Vector2I(chunkX, chunkY);
+    }
+
+    private Vector2I[] GetSurroundingChunks(Vector2I chunk)
+    {
+        var chunks = new Vector2I[9];
+        var index = 0;
+        for (var x = chunk.X - 1; x <= chunk.X + 1; x++)
+        {
+            for (var y = chunk.Y - 1; y <= chunk.Y + 1; y++)
+            {
+                chunks[index] = new Vector2I(x, y);
+                index++;
+            }
+        }
+
+        return chunks;
     }
 }
