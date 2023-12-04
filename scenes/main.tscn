@@ -5,9 +5,10 @@
 
 [node name="Main" type="Node2D"]
 
-[node name="World" parent="." instance=ExtResource("1_ldo6c")]
-_worldWidth = 2000
-_worldHeight = 400
+[node name="World" parent="." node_paths=PackedStringArray("_player") instance=ExtResource("1_ldo6c")]
+_worldWidth = 9000
+_worldHeight = 3000
+_player = NodePath("../Player")
 
 [node name="Player" parent="." instance=ExtResource("2_80a1n")]
 position = Vector2(-4, -1869)

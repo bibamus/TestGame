@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using TestGame.world.generation;
 
 namespace TestGame.world;
 
@@ -10,12 +11,14 @@ public partial class World : Node
     [Export] private int _worldWidth;
     [Export] private int _worldHeight;
 
+    [Export] private Node2D _player;
+    
     private WorldData _worldData;
 
     public override void _Ready()
     {
         _tileMap = GetNode<TileMap>("TileMap");
-        var generator = GetNode<WorldGenerator>("WorldGenerator");
+        var generator = GetNode<generation.WorldGenerator>("WorldGenerator");
         var settings = new WorldGenerationSettings
         {
             WorldWidth = _worldWidth,
@@ -23,9 +26,33 @@ public partial class World : Node
             Seed = new Random().Next()
         };
         _worldData = generator.GenerateWorld(settings);
-        UpdateTilemap();
+        
+        
+        for(var x = 0; x < _worldWidth ; x++)
+        {
+            for (var y = 0; y < _worldHeight; y++)
+            {
+                var coord = _worldData.BottomLeft + new Vector2I(x,-y);
+                var block = _worldData.GetBlockAtWorldPosition(coord);
+               
+
+            }
+        }
+        
+        // UpdateTilemap();
     }
 
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+    
+    }
+    
+    private Vector2I GetPlayerTilePosition()
+    {
+        return _tileMap.LocalToMap(_player.Position);
+    }
+    
     private void UpdateTilemap()
     {
         for (var x = 0; x < _worldWidth; x++)

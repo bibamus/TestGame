@@ -1,4 +1,4 @@
-﻿namespace TestGame.world;
+﻿namespace TestGame.world.generation;
 
 public class WorldGenerationSettings
 {
