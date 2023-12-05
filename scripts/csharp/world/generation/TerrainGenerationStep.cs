@@ -14,7 +14,7 @@ public partial class TerrainGenerationStep : GenerationStep
 
     public override WorldGenerationData Apply(WorldGenerationData data, WorldGenerationSettings settings)
     {
-        var worldData = data.WorldData;
+        var worldData2 = data.WorldData;
 
         var fastNoiseLite = new FastNoiseLite
         {
@@ -28,11 +28,11 @@ public partial class TerrainGenerationStep : GenerationStep
         for (var x = 0; x < settings.WorldWidth; x++)
         {
             var noise = fastNoiseLite.GetNoise1D(x);
-            var height = (int) Math.Floor((worldData.SurfaceLevel) + noise * _amplitude);
+            var height = (int) Math.Floor((worldData2.SurfaceLevel) + noise * _amplitude);
             terrainHeights[x] = height;
             for (var y = 0; y < height; y++)
             {
-                worldData.Blocks[x, y] = Blocks.GetBlock(BlockType.Dirt);
+                worldData2.Blocks[x][y] = BlockType.Dirt;
             }
         }
 

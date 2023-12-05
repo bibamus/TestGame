@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Godot.Collections;
 
 namespace TestGame.world.generation;
 
 public partial class WorldGenerator : Node
 {
-    
-    private bool _isGenerating;
-    private WorldData _worldData;
-    
     private List<GenerationStep> _steps;
 
     public override void _Ready()
@@ -25,12 +22,27 @@ public partial class WorldGenerator : Node
     public WorldData GenerateWorld(WorldGenerationSettings settings)
     {
         GD.Print("Generating world");
-        var worldData = new WorldData(settings.WorldWidth, settings.WorldHeight)
-        {
-            SurfaceLevel = (int)Math.Floor(settings.WorldHeight * 0.75),
-        };
 
-        var worldGenerationData = new WorldGenerationData(worldData);
+        var outer = new Array<Array<BlockType>>();
+        for (var x = 0; x < settings.WorldWidth; x++)
+        {
+            var inner = new Array<BlockType>();
+            for (var y = 0; y < settings.WorldHeight; y++)
+            {
+                inner.Add(BlockType.None);
+            }
+
+            outer.Add(inner);
+        }
+
+        var worldData2 = new WorldData()
+        {
+            SurfaceLevel = (int) Math.Floor(settings.WorldHeight * 0.75),
+            Height = settings.WorldHeight,
+            Width = settings.WorldWidth,
+            Blocks = outer
+        };
+        var worldGenerationData = new WorldGenerationData(worldData2);
 
         foreach (var generationStep in _steps)
         {
@@ -40,6 +52,6 @@ public partial class WorldGenerator : Node
         }
 
         GD.Print("Finished generating world");
-        return worldData;
+        return worldData2;
     }
 }

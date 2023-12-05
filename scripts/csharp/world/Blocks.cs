@@ -23,6 +23,7 @@ public static class Blocks
 
 public enum BlockType
 {
+    None,
     Dirt,
     Stone
 }

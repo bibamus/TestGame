@@ -4,38 +4,31 @@ namespace TestGame.world;
 
 public partial class TileMapChunk : TileMap
 {
-    public Block[,] Blocks { get; set; }
+    public BlockType[,] ChunkBlocks { get; set; }
 
     public override void _Ready()
     {
         base._Ready();
         GD.Print($"TileMapChunk {Name} ready");
         UpdateTileMap();
-
     }
 
     private void UpdateTileMap()
     {
-        for (var x = 0; x < Blocks.GetLength(0); x++)
+        for (var x = 0; x < ChunkBlocks.GetLength(0); x++)
         {
-            for (var y = 0; y < Blocks.GetLength(1); y++)
+            for (var y = 0; y < ChunkBlocks.GetLength(1); y++)
             {
-                var block = Blocks[x, y];
-                if (block == null)
+                var block = ChunkBlocks[x, y];
+                if (block == BlockType.None)
                 {
                     continue;
                 }
 
-                SetCell(0, new Vector2I(x, -y), block.SourceId,
+                SetCell(0, new Vector2I(x, -y), Blocks.GetBlock(block).SourceId,
                     new Vector2I(7, 1));
             }
         }
     }
-
-    public override void _Process(double delta)
-    {
-        base._Process(delta);
-        
-
-    }
+    
 }

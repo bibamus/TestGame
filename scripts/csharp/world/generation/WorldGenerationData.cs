@@ -8,5 +8,6 @@ public class WorldGenerationData
     }
 
     public WorldData WorldData { get; }
+
     public int[] TerrainHeightMap { get; set; }
 }

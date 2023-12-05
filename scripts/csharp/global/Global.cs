@@ -7,30 +7,28 @@ namespace TestGame.global;
 
 public partial class Global : Node
 {
-    
-    
     private State _currentState;
 
     public WorldData WorldData { get; private set; }
-    
+
     private WorldInitializeState _worldInitializeState;
 
     public override void _Ready()
     {
         base._Ready();
-        
+
         var worldLoadState = new WorldLoadState();
         worldLoadState.WorldLoaded += OnWorldLoaded;
-        
+
         var worldGenerationState = new WorldGenerationState();
         worldGenerationState.WorldGenerated += OnWorldGenerated;
-        
+
         worldLoadState.WorldNotFound += () => SwitchState(worldGenerationState);
-        
+
         _worldInitializeState = new WorldInitializeState(this);
 
         _worldInitializeState.WorldInitializedFinished += () => SwitchState(new GameRunState());
-        
+
         SwitchState(worldLoadState);
     }
 
@@ -43,6 +41,7 @@ public partial class Global : Node
     private void OnWorldGenerated(WorldData wd)
     {
         WorldData = wd;
+        ResourceSaver.Save(wd, "user://world_data.res");
         SwitchState(_worldInitializeState);
     }
 
