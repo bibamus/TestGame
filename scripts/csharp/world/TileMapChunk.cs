@@ -11,6 +11,7 @@ public partial class TileMapChunk : TileMap
         base._Ready();
         GD.Print($"TileMapChunk {Name} ready");
         UpdateTileMap();
+
     }
 
     private void UpdateTileMap()
@@ -29,5 +30,12 @@ public partial class TileMapChunk : TileMap
                     new Vector2I(7, 1));
             }
         }
+    }
+
+    public override void _Process(double delta)
+    {
+        base._Process(delta);
+        
+
     }
 }

@@ -12,20 +12,25 @@ public partial class WorldGenerationState : State
     private WorldGenerator _worldGenerator;
     private Task<WorldData> _task;
 
-    public override void StateEnter(Node node)
+    
+    public override void StateEnter()
     {
-        _worldGenerator = GD.Load<PackedScene>("res://scenes/world_generator.tscn").Instantiate<WorldGenerator>();
-        node.AddChild(_worldGenerator);
-        _task = Task.Run(() => _worldGenerator.GenerateWorld(new WorldGenerationSettings()
-        {
-            WorldWidth = 32000,
-            WorldHeight = 32000,
-            Seed = 12345
-        }));
+
     }
 
     public override void StateProcess(double delta)
     {
+        if (_task == null)
+        {
+            _worldGenerator = GD.Load<PackedScene>("res://scenes/world_generator.tscn").Instantiate<WorldGenerator>();
+            AddChild(_worldGenerator);
+            _task = Task.Run(() => _worldGenerator.GenerateWorld(new WorldGenerationSettings()
+            {
+                WorldWidth = 256,
+                WorldHeight = 256,
+                Seed = 12345
+            }));
+        }
         if (_task.IsCompleted)
         {
             var worldData = _task.Result;

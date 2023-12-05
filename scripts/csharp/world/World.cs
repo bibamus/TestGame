@@ -11,9 +11,6 @@ public partial class World : Node
 {
     [Signal] public delegate void WorldLoadedEventHandler();
     
-    [Export] private int _worldWidth;
-    [Export] private int _worldHeight;
-
     [Export] private Node2D _player;
 
     private WorldData _worldData;
@@ -21,65 +18,18 @@ public partial class World : Node
     private TileMapChunk[,] _chunkMaps;
 
 
-    private bool _initialized = false;
-    
-    private bool _loaded = false;
-
-
     public override void _Ready()
     {
-        var generator = GetNode<WorldGenerator>("WorldGenerator");
-        Task.Run(() => generator.GenerateWorld(new WorldGenerationSettings()
+        base._Ready();
+        foreach (var tileMapChunk in _chunkMaps)
         {
-            WorldWidth = _worldWidth,
-            WorldHeight = _worldHeight,
-            Seed = 12345
-        }));
-
-
-    }
-
-    private void OnWorldGenerated(WorldData worldData)
-    {
-        _worldData = worldData;
-        var tileMapScene = GD.Load<PackedScene>("res://scenes/tile_map.tscn");
-        _chunkMaps = new TileMapChunk[_worldData.HChunkCount, _worldData.VChunkCount];
-
-        GD.Print("Generating chunk maps");
-        for (var x = 0; x < _worldData.HChunkCount; x++)
-        {
-            for (var y = 0; y < _worldData.VChunkCount; y++)
-            {
-                var chunk = _worldData.GetChunk(x, y);
-                var chunkNode = tileMapScene.Instantiate<TileMapChunk>();
-                chunkNode.Name = $"Chunk {x},{y}";
-                chunkNode.Blocks = chunk;
-                var chunkY = (_worldData.VChunkCount - y) * _worldData.ChunkSize.Y * 16;
-                var chunkX = x * _worldData.ChunkSize.X * 16;
-                chunkNode.Position = new Vector2(chunkX, chunkY);
-                _chunkMaps[x, y] = chunkNode;
-            }
+            AddChild(tileMapChunk);
         }
-
-        GD.Print("Finished generating chunk maps");
-        _loaded = true;
     }
 
 
     public override void _Process(double delta)
     {
-        if (!_loaded)
-        {
-            return;
-        }
-
-        if (!_initialized)
-        {
-            EmitSignal(SignalName.WorldLoaded);
-            _initialized = true;
-        }
-
-
         base._Process(delta);
 
         return;
@@ -152,5 +102,30 @@ public partial class World : Node
         }
 
         return chunks;
+    }
+
+    public void Init(WorldData worldData)
+    {
+        _worldData = worldData;
+        var tileMapScene = GD.Load<PackedScene>("res://scenes/tile_map.tscn");
+        _chunkMaps = new TileMapChunk[_worldData.HChunkCount, _worldData.VChunkCount];
+
+        GD.Print("Generating chunk maps");
+        for (var x = 0; x < _worldData.HChunkCount; x++)
+        {
+            for (var y = 0; y < _worldData.VChunkCount; y++)
+            {
+                var chunk = _worldData.GetChunk(x, y);
+                var chunkNode = tileMapScene.Instantiate<TileMapChunk>();
+                chunkNode.Name = $"Chunk {x},{y}";
+                chunkNode.Blocks = chunk;
+                var chunkY = (_worldData.VChunkCount - y) * _worldData.ChunkSize.Y * 16;
+                var chunkX = x * _worldData.ChunkSize.X * 16;
+                chunkNode.Position = new Vector2(chunkX, chunkY);
+                _chunkMaps[x, y] = chunkNode;
+            }
+        }
+
+        GD.Print("Finished generating chunk maps");
     }
 }

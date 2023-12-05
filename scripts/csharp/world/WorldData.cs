@@ -31,7 +31,7 @@ public partial class WorldData : Resource
     public int WorldWidth { get; }
     public int WorldHeight { get; }
     public int SurfaceLevel { get; set; }
-    public Block[,] Blocks { get; }
+    public Block[,] Blocks { get; set; }
 
     public Vector2I BottomLeft => new Vector2I(-WorldWidth / 2, WorldHeight / 2);
     public Vector2I BottomRight => new Vector2I(WorldWidth / 2, WorldHeight / 2);

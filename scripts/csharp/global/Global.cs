@@ -10,9 +10,11 @@ public partial class Global : Node
     
     
     private State _currentState;
+
+    public WorldData WorldData { get; private set; }
     
-    private WorldData _worldData;
-    
+    private WorldInitializeState _worldInitializeState;
+
     public override void _Ready()
     {
         base._Ready();
@@ -25,44 +27,37 @@ public partial class Global : Node
         
         worldLoadState.WorldNotFound += () => SwitchState(worldGenerationState);
         
+        _worldInitializeState = new WorldInitializeState(this);
 
+        _worldInitializeState.WorldInitializedFinished += () => SwitchState(new GameRunState());
+        
         SwitchState(worldLoadState);
     }
 
     private void OnWorldLoaded(WorldData wd)
     {
-        _worldData = wd;
-        SwitchState(new GameRunState());
+        WorldData = wd;
+        SwitchState(_worldInitializeState);
     }
 
     private void OnWorldGenerated(WorldData wd)
     {
-        _worldData = wd;
-        var error = ResourceSaver.Save( _worldData, "user://world_data.res");
-        if (error != Error.Ok)
-        {
-            GD.PrintErr($"Error saving world data: {error}");
-        }
-        SwitchState(new GameRunState());
+        WorldData = wd;
+        SwitchState(_worldInitializeState);
     }
 
     private void SwitchState(State newState)
     {
         _currentState?.StateExit();
+        _currentState?.QueueFree();
         _currentState = newState;
-        _currentState.StateEnter(this);
+        _currentState.StateEnter();
+        AddChild(_currentState);
     }
 
     public override void _Process(double delta)
     {
         base._Process(delta);
         _currentState.StateProcess(delta);
-        // if (_worldGenerated)
-        // {
-        //     if (IsInstanceValid(_worldGenerator))
-        //     {
-        //         _worldGenerator.QueueFree();
-        //     }
-        // }
     }
 }
