@@ -9,9 +9,10 @@ namespace TestGame.world;
 
 public partial class World : Node
 {
-    [Signal] public delegate void WorldLoadedEventHandler();
-    
-    [Export] private Node2D _player;
+    [Signal]
+    public delegate void WorldLoadedEventHandler();
+
+    [Export] public Node2D Player { get; set; }
 
     private WorldData _worldData;
 
@@ -21,10 +22,7 @@ public partial class World : Node
     public override void _Ready()
     {
         base._Ready();
-        foreach (var tileMapChunk in _chunkMaps)
-        {
-            AddChild(tileMapChunk);
-        }
+        UpdateChunks();
     }
 
 
@@ -32,8 +30,11 @@ public partial class World : Node
     {
         base._Process(delta);
 
-        return;
+        UpdateChunks();
+    }
 
+    private void UpdateChunks()
+    {
         var playerChunk = GetPlayerChunk();
         var surroundingChunks = GetSurroundingChunks(playerChunk);
         var children = GetChildren()
@@ -82,7 +83,7 @@ public partial class World : Node
 
     private Vector2I GetPlayerChunk()
     {
-        var playerPos = _player.Position;
+        var playerPos = Player.Position;
         var chunkX = (int) Math.Floor(playerPos.X / (_worldData.ChunkSize.X * 16));
         var chunkY = (int) Math.Floor(playerPos.Y / (_worldData.ChunkSize.Y * 16));
         return new Vector2I(chunkX, chunkY);

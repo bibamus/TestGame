@@ -13,12 +13,5 @@ public partial class GameRunState : State
     public override void StateProcess(double delta)
     {
         base.StateProcess(delta);
-        if (!_initialized)
-        {
-            var player = GD.Load<PackedScene>("res://scenes/player.tscn").Instantiate<Node2D>();
-            player.Position = new Vector2(80, 80);
-            GetTree().Root.AddChild(player);
-            _initialized = true;
-        }
     }
 }

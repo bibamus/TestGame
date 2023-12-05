@@ -72,16 +72,6 @@ public partial class WorldData : Resource
         {
             throw new ArgumentException("World height must be greater than 0");
         }
-
-        if (worldWidth % 2 != 0)
-        {
-            throw new ArgumentException("World width must be even");
-        }
-
-        if (worldHeight % 2 != 0)
-        {
-            throw new ArgumentException("World height must be even");
-        }
     }
 
     public Block GetBlockAtWorldPosition(Vector2I worldPosition)
