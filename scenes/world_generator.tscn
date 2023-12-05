@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://x28iarh0jx0u"]
+
+[ext_resource type="Script" path="res://scripts/csharp/world/generation/WorldGenerator.cs" id="1_xs5af"]
+[ext_resource type="Script" path="res://scripts/csharp/world/generation/TestGenerationStep.cs" id="2_14de5"]
+
+[node name="WorldGenerator" type="Node"]
+script = ExtResource("1_xs5af")
+
+[node name="TestGenerationStep" type="Node" parent="."]
+script = ExtResource("2_14de5")

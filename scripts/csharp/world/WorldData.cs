@@ -5,11 +5,6 @@ namespace TestGame.world;
 
 public partial class WorldData : Resource
 {
-    public Vector2I ChunkSize { get; } = new Vector2I(256, 256);
-
-    public int HChunkCount { get; private set; }
-    public int VChunkCount { get; private set; }
-
     public WorldData(int worldWidth, int worldHeight)
     {
         ValidateInput(worldWidth, worldHeight);
@@ -18,10 +13,30 @@ public partial class WorldData : Resource
         WorldHeight = worldHeight;
         Blocks = new Block[WorldWidth, WorldHeight];
 
-        HChunkCount = (int)Math.Ceiling((double)WorldWidth / ChunkSize.X);
-        VChunkCount = (int)Math.Ceiling((double)WorldHeight / ChunkSize.Y);
+        HChunkCount = (int) Math.Ceiling((double) WorldWidth / ChunkSize.X);
+        VChunkCount = (int) Math.Ceiling((double) WorldHeight / ChunkSize.Y);
         GD.Print($"World has {HChunkCount} horizontal chunks and {VChunkCount} vertical chunks");
     }
+
+    // ReSharper disable once UnusedMember.Global - Used by ResourceLoader
+    public WorldData()
+    {
+    }
+
+    public Vector2I ChunkSize { get; } = new Vector2I(64, 64);
+
+    public int HChunkCount { get; private set; }
+    public int VChunkCount { get; private set; }
+
+    public int WorldWidth { get; }
+    public int WorldHeight { get; }
+    public int SurfaceLevel { get; set; }
+    public Block[,] Blocks { get; }
+
+    public Vector2I BottomLeft => new Vector2I(-WorldWidth / 2, WorldHeight / 2);
+    public Vector2I BottomRight => new Vector2I(WorldWidth / 2, WorldHeight / 2);
+    public Vector2I TopLeft => new Vector2I(-WorldWidth / 2, -WorldHeight / 2);
+    public Vector2I TopRight => new Vector2I(WorldWidth / 2, -WorldHeight / 2);
 
 
     public Block[,] GetChunk(int chunkX, int chunkY)
@@ -68,16 +83,6 @@ public partial class WorldData : Resource
             throw new ArgumentException("World height must be even");
         }
     }
-
-    public int WorldWidth { get; }
-    public int WorldHeight { get; }
-    public int SurfaceLevel { get; set; }
-    public Block[,] Blocks { get; }
-
-    public Vector2I BottomLeft => new Vector2I(-WorldWidth / 2, WorldHeight / 2);
-    public Vector2I BottomRight => new Vector2I(WorldWidth / 2, WorldHeight / 2);
-    public Vector2I TopLeft => new Vector2I(-WorldWidth / 2, -WorldHeight / 2);
-    public Vector2I TopRight => new Vector2I(WorldWidth / 2, -WorldHeight / 2);
 
     public Block GetBlockAtWorldPosition(Vector2I worldPosition)
     {

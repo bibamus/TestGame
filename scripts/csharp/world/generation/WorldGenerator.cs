@@ -7,6 +7,10 @@ namespace TestGame.world.generation;
 
 public partial class WorldGenerator : Node
 {
+    
+    private bool _isGenerating;
+    private WorldData _worldData;
+    
     private List<GenerationStep> _steps;
 
     public override void _Ready()
@@ -36,6 +40,6 @@ public partial class WorldGenerator : Node
         }
 
         GD.Print("Finished generating world");
-        return worldGenerationData.WorldData;
+        return worldData;
     }
 }
