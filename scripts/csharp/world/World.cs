@@ -18,7 +18,7 @@ public partial class World : Node
 
     private TileMapChunk[,] _chunkMaps;
 
-    private Vector2I _chunkSize = new Vector2I(64, 64);
+    [Export] private Vector2I _chunkSize = new Vector2I(64, 64);
     private int _hChunkCount;
     private int _vChunkCount;
 
@@ -46,7 +46,7 @@ public partial class World : Node
         var surroundingChunks = GetSurroundingChunks(playerChunk)
             .Select(coords => _chunkMaps[coords.X, coords.Y])
             .ToHashSet();
-        
+
         var children = GetChildren()
             .Where(node => node is TileMapChunk)
             .Cast<TileMapChunk>()

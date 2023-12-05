@@ -12,6 +12,9 @@ public partial class Global : Node
     public WorldData WorldData { get; private set; }
 
     private WorldInitializeState _worldInitializeState;
+    
+    [Export] private int _worldWidth = 1024;
+    [Export] private int _worldHeight = 1024;
 
     public override void _Ready()
     {
@@ -20,7 +23,13 @@ public partial class Global : Node
         var worldLoadState = new WorldLoadState();
         worldLoadState.WorldLoaded += OnWorldLoaded;
 
-        var worldGenerationState = new WorldGenerationState();
+        var worldGenerationState = new WorldGenerationState(new WorldGenerationSettings
+        {
+            WorldWidth = _worldWidth,
+            WorldHeight = _worldHeight,
+            Seed = 12345
+            
+        });
         worldGenerationState.WorldGenerated += OnWorldGenerated;
 
         worldLoadState.WorldNotFound += () => SwitchState(worldGenerationState);
