@@ -60,6 +60,7 @@ public partial class Global : Node
         _currentState?.QueueFree();
         _currentState = newState;
         _currentState.StateEnter();
+        _currentState.Name = newState.GetType().Name;
         AddChild(_currentState);
     }
 

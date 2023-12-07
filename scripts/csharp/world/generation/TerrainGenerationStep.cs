@@ -12,9 +12,10 @@ public partial class TerrainGenerationStep : GenerationStep
 
     [Export] private float _fractalGain = 0.3f;
 
-    public override WorldGenerationData Apply(WorldGenerationData data, WorldGenerationSettings settings)
+    public override WorldGenerationData Apply(WorldGenerationData data)
     {
-        var worldData2 = data.WorldData;
+        var worldData = data.WorldData;
+        var settings = data.Settings;
 
         var fastNoiseLite = new FastNoiseLite
         {
@@ -28,11 +29,11 @@ public partial class TerrainGenerationStep : GenerationStep
         for (var x = 0; x < settings.WorldWidth; x++)
         {
             var noise = fastNoiseLite.GetNoise1D(x);
-            var height = (int) Math.Floor((worldData2.SurfaceLevel) + noise * _amplitude);
+            var height = (int) Math.Floor((worldData.SurfaceLevel) + noise * _amplitude);
             terrainHeights[x] = height;
             for (var y = 0; y < height; y++)
             {
-                worldData2.Blocks[x][y] = BlockType.Dirt;
+                worldData.Blocks[x][y] = BlockType.Dirt;
             }
         }
 

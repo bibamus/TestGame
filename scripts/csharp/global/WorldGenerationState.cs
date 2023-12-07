@@ -11,7 +11,6 @@ public partial class WorldGenerationState : State
     public delegate void WorldGeneratedEventHandler(WorldData worldData);
 
     private WorldGenerator _worldGenerator;
-    private Task<WorldData> _task;
     private WorldGenerationSettings _settings;
 
     public WorldGenerationState(WorldGenerationSettings settings)
@@ -22,23 +21,16 @@ public partial class WorldGenerationState : State
 
     public override void StateEnter()
     {
+        _worldGenerator = GD.Load<PackedScene>("res://scenes/world_generator.tscn").Instantiate<WorldGenerator>();
+        _worldGenerator.Settings = _settings;
+        _worldGenerator.GenerationStepFinished += (stepName) => GD.Print($"World generation finished step {stepName}");
+        _worldGenerator.WorldGenerated += (worldData) => EmitSignal(SignalName.WorldGenerated, worldData);
+        AddChild(_worldGenerator);
     }
 
     public override void StateProcess(double delta)
     {
-        if (_task == null)
-        {
-            _worldGenerator = GD.Load<PackedScene>("res://scenes/world_generator.tscn").Instantiate<WorldGenerator>();
-            AddChild(_worldGenerator);
-            _task = Task.Run(() => _worldGenerator.GenerateWorld(_settings));
-        }
 
-        if (_task.IsCompleted)
-        {
-            var worldData = _task.Result;
-            GD.Print("Word generation task completed");
-            EmitSignal(SignalName.WorldGenerated, worldData);
-        }
     }
 
     public override void StateExit()
